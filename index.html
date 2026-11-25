@@ -1,13 +1,1261 @@
-<!DOCTYPE html>
 
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
-  <title>Hello, World!</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ITI40417 Network Engineering Study App — All Saints TVET Academy</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .flip-card-inner {
+      transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    .flip-card-inner.is-flipped {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front,
+    .flip-card-back {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .flip-card-back {
+      transform: rotateY(180deg);
+    }
+  </style>
 </head>
-<body>
-  <h1>
-    Hello, World!
-  </h1>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Top Header -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center shrink-0">
+          <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight leading-tight">All Saints TVET Academy — Study Lab</h1>
+          <p class="text-xs text-slate-400">Francis Study Guide-Cluster 1</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 text-xs">
+        <div class="hidden sm:flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+          <span class="text-slate-400">Pass Mark:</span>
+          <span class="font-semibold text-emerald-400">65%</span>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+          <span class="text-slate-400">Mastery:</span>
+          <span id="header-mastery" class="font-semibold text-sky-400">0%</span>
+        </div>
+        <button id="btn-reset-progress" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-1 overflow-x-auto pb-2" aria-label="Study Modules">
+      <button data-tab="overview" class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition bg-sky-600 text-white">
+        Case Study &amp; Crisis Hub
+      </button>
+      <button data-tab="subnetting" class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition text-slate-300 hover:bg-slate-800">
+        VLANs &amp; Subnetting Lab
+      </button>
+      <button data-tab="flashcards" class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition text-slate-300 hover:bg-slate-800">
+        Flashcards
+      </button>
+      <button data-tab="quiz" class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition text-slate-300 hover:bg-slate-800">
+        Cluster 1 Practice Quiz
+      </button>
+      <button data-tab="mockexam" class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition text-slate-300 hover:bg-slate-800">
+        Mock Exam: Set A (49 Qs)
+      </button>
+      <button data-tab="decisions" class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition text-slate-300 hover:bg-slate-800">
+        Supplier &amp; Risk Matrix
+      </button>
+    </nav>
+  </header>
+
+  <!-- Toast Banner -->
+  <div id="toast-banner" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-sm px-4 py-2.5 rounded-xl shadow-lg border border-slate-700"></div>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- TAB 1: CASE STUDY & CRISIS HUB -->
+    <section id="tab-overview" class="tab-panel space-y-6">
+      <!-- Campus Stats Cards -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-sky-700 bg-sky-50 px-2.5 py-1 rounded-full">Main Campus</span>
+            <span class="text-xs text-slate-500">965 Total Users</span>
+          </div>
+          <h2 class="text-lg font-bold text-slate-900">St. Andrew Campus</h2>
+          <p class="text-xs text-slate-600 mt-1">Hosts SMS, LMS, file storage, and admin applications.</p>
+          <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+            <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+              <div class="text-lg font-bold text-slate-900">850</div>
+              <div class="text-[11px] text-slate-500">Students</div>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+              <div class="text-lg font-bold text-slate-900">75</div>
+              <div class="text-[11px] text-slate-500">Lecturers</div>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+              <div class="text-lg font-bold text-slate-900">40</div>
+              <div class="text-[11px] text-slate-500">Admin Staff</div>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 mt-3"><span class="font-semibold">Facilities:</span> 4 computer labs, admin offices, Finance, Student Services, library, server room.</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full">Branch Campus</span>
+            <span class="text-xs text-slate-500">570 Total Users</span>
+          </div>
+          <h2 class="text-lg font-bold text-slate-900">Montego Bay, St. James</h2>
+          <p class="text-xs text-slate-600 mt-1">Depends on St. Andrew via site-to-site VPN for teaching &amp; admin systems.</p>
+          <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+            <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+              <div class="text-lg font-bold text-slate-900">500</div>
+              <div class="text-[11px] text-slate-500">Students</div>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+              <div class="text-lg font-bold text-slate-900">45</div>
+              <div class="text-[11px] text-slate-500">Lecturers</div>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+              <div class="text-lg font-bold text-slate-900">25</div>
+              <div class="text-[11px] text-slate-500">Admin Staff</div>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 mt-3"><span class="font-semibold">Facilities:</span> 3 computer labs, hospitality training, admin offices, small network room.</p>
+        </div>
+
+        <!-- Topology Diagram Card -->
+        <div class="bg-slate-900 text-white rounded-2xl border border-slate-800 p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Current WAN &amp; IP Conflict</span>
+            <h2 class="text-lg font-bold mt-1">Why Traffic Fails Today</h2>
+          </div>
+          <svg viewBox="0 0 320 130" class="w-full h-32 my-2" role="img" aria-label="St. Andrew to Montego Bay VPN topology">
+            <rect x="8" y="20" width="108" height="90" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+            <text x="62" y="42" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="700">St. Andrew</text>
+            <text x="62" y="58" text-anchor="middle" fill="#f87171" font-size="10">192.168.1.0/24</text>
+            <text x="62" y="75" text-anchor="middle" fill="#94a3b8" font-size="9">SMS / LMS / Files</text>
+            <text x="62" y="92" text-anchor="middle" fill="#fbbf24" font-size="9">Loops 10am-2pm</text>
+
+            <path d="M118 65 L202 65" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="5 4" />
+            <rect x="130" y="47" width="60" height="20" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="1" />
+            <text x="160" y="60" text-anchor="middle" fill="#fbbf24" font-size="9" font-weight="600">Site VPN</text>
+            <text x="160" y="85" text-anchor="middle" fill="#f87171" font-size="9">Overlapping IP!</text>
+
+            <rect x="204" y="20" width="108" height="90" rx="10" fill="#1e293b" stroke="#818cf8" stroke-width="1.5" />
+            <text x="258" y="42" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="700">Montego Bay</text>
+            <text x="258" y="58" text-anchor="middle" fill="#f87171" font-size="10">192.168.1.0/24</text>
+            <text x="258" y="75" text-anchor="middle" fill="#94a3b8" font-size="9">3 Labs + Hosp.</text>
+            <text x="258" y="92" text-anchor="middle" fill="#fbbf24" font-size="9">Switch failed 2x</text>
+          </svg>
+          <p class="text-xs text-slate-300">Both campuses share <code class="text-rose-300 font-semibold">192.168.1.0/24</code>, blocking clean site-to-site routing and causing DHCP/static IP collisions.</p>
+        </div>
+      </div>
+
+      <!-- Interactive Network Audit: What's Wrong Today -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Current Network Faults &amp; Remediation</h3>
+            <p class="text-xs text-slate-500">Click any fault card to inspect root cause and required upgrade fix.</p>
+          </div>
+          <span class="text-xs font-medium text-slate-500">6 Core Problem Areas</span>
+        </div>
+        <div id="faults-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </div>
+
+      <!-- Interactive Simulator: The Week Everything Happened -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Crisis Triage Simulator: "The Week Everything Happened"</h3>
+            <p class="text-xs text-slate-500">Select each day (Monday–Friday) and choose the best project &amp; engineering response.</p>
+          </div>
+          <div id="crisis-score-badge" class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-700">0 / 5 Resolved</div>
+        </div>
+        <div class="flex flex-wrap gap-2 mb-4" id="crisis-day-buttons"></div>
+        <div id="crisis-panel" class="bg-slate-50 rounded-xl border border-slate-200 p-4"></div>
+      </div>
+    </section>
+
+    <!-- TAB 2: VLANS & SUBNETTING LAB -->
+    <section id="tab-subnetting" class="tab-panel hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Interactive Subnetting Calculator & Campus Planner -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">IPv4 CIDR &amp; Campus Subnet Calculator</h2>
+            <p class="text-xs text-slate-500">Test non-overlapping subnets for St. Andrew and Montego Bay to replace <code class="text-rose-600">192.168.1.0/24</code>.</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-2">
+              <label for="calc-ip" class="block text-xs font-medium text-slate-700 mb-1">Network / IP Address</label>
+              <input id="calc-ip" type="text" value="10.10.20.0" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
+            </div>
+            <div>
+              <label for="calc-cidr" class="block text-xs font-medium text-slate-700 mb-1">CIDR Prefix (/8–/30)</label>
+              <input id="calc-cidr" type="number" min="8" max="30" value="22" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button data-preset="10.10.20.0/22" class="preset-cidr text-xs px-2.5 py-1.5 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 font-medium">St. Andrew Students (/22)</button>
+            <button data-preset="10.20.20.0/23" class="preset-cidr text-xs px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-medium">MoBay Students (/23)</button>
+            <button data-preset="10.10.60.0/26" class="preset-cidr text-xs px-2.5 py-1.5 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 font-medium">St. Andrew CCTV +30 (/26)</button>
+            <button data-preset="10.20.60.0/27" class="preset-cidr text-xs px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium">MoBay CCTV +20 (/27)</button>
+          </div>
+          <div id="calc-results" class="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs"></div>
+        </div>
+
+        <!-- Subnetting Practice Drill -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-base font-bold text-slate-900">Subnetting Practice Drill</h2>
+              <p class="text-xs text-slate-500">Solve the subnet parameters for an All Saints TVET VLAN.</p>
+            </div>
+            <button id="btn-new-drill" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition">New Problem</button>
+          </div>
+          <div id="drill-prompt" class="bg-slate-900 text-white p-4 rounded-xl text-sm"></div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="drill-net" class="block text-xs font-medium text-slate-700 mb-1">Network Address</label>
+              <input id="drill-net" type="text" placeholder="e.g. 10.10.4.0" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+            </div>
+            <div>
+              <label for="drill-bcast" class="block text-xs font-medium text-slate-700 mb-1">Broadcast Address</label>
+              <input id="drill-bcast" type="text" placeholder="e.g. 10.10.4.63" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+            </div>
+            <div>
+              <label for="drill-hosts" class="block text-xs font-medium text-slate-700 mb-1">Usable Hosts</label>
+              <input id="drill-hosts" type="number" placeholder="e.g. 62" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <button id="btn-check-drill" class="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition">Check Answer</button>
+            <button id="btn-reveal-drill" class="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Show Solution</button>
+          </div>
+          <div id="drill-feedback" class="hidden text-xs p-3 rounded-xl border"></div>
+        </div>
+      </div>
+
+      <!-- 9 Required VLANs Table -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Required 9-VLAN Segmentation Blueprint</h3>
+            <p class="text-xs text-slate-500">Every VLAN mandated by the case study, with recommended non-overlapping campus blocks &amp; security controls.</p>
+          </div>
+          <span class="text-xs font-semibold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-full">St. Andrew: 10.10.x.x | MoBay: 10.20.x.x</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-500 uppercase">
+                <th class="py-2.5 px-3">VLAN ID</th>
+                <th class="py-2.5 px-3">Segment Name</th>
+                <th class="py-2.5 px-3">St. Andrew Subnet</th>
+                <th class="py-2.5 px-3">Montego Bay Subnet</th>
+                <th class="py-2.5 px-3">Security &amp; Policy Requirement</th>
+              </tr>
+            </thead>
+            <tbody id="vlan-table-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: FLASHCARDS -->
+    <section id="tab-flashcards" class="tab-panel hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2" id="fc-category-filters"></div>
+        <div class="flex items-center gap-2">
+          <span id="fc-counter" class="text-xs font-semibold text-slate-600">Card 1 of 1</span>
+          <button id="btn-fc-shuffle" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">Shuffle</button>
+        </div>
+      </div>
+
+      <div class="max-w-2xl mx-auto">
+        <div class="perspective-1000">
+          <div id="flashcard-inner" class="flip-card-inner relative w-full h-72 sm:h-80 cursor-pointer">
+            <div class="flip-card-front absolute inset-0 bg-white rounded-2xl border-2 border-slate-200 shadow-md p-6 flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span id="fc-front-cat" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-sky-700">Category</span>
+                <span class="text-xs text-slate-400">Click card to flip</span>
+              </div>
+              <div id="fc-front-text" class="text-lg sm:text-xl font-bold text-slate-900 text-center px-2"></div>
+              <div class="text-center text-xs text-slate-400" id="fc-status-label">Unreviewed</div>
+            </div>
+            <div class="flip-card-back absolute inset-0 bg-slate-900 text-white rounded-2xl border-2 border-sky-500 shadow-md p-6 flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300">Answer / Key Fact</span>
+                <span class="text-xs text-slate-400">Click to flip back</span>
+              </div>
+              <div id="fc-back-text" class="text-sm sm:text-base text-slate-100 text-center leading-relaxed px-2"></div>
+              <div class="text-center text-xs text-slate-400">Grounded in All Saints TVET Case Study</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 mt-5">
+          <button id="btn-fc-prev" class="px-4 py-2 text-xs font-semibold rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition">Previous</button>
+          <div class="flex items-center gap-2">
+            <button id="btn-fc-review" class="px-4 py-2 text-xs font-semibold rounded-xl bg-amber-50 border border-amber-200 hover:bg-amber-100 text-amber-800 transition">Need Review</button>
+            <button id="btn-fc-mastered" class="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition">Got It!</button>
+          </div>
+          <button id="btn-fc-next" class="px-4 py-2 text-xs font-semibold rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: CLUSTER 1 PRACTICE QUIZ -->
+    <section id="tab-quiz" class="tab-panel hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Cluster 1 Written &amp; Portfolio Defence Quiz</h2>
+          <p class="text-xs text-slate-500">15 questions based strictly on All Saints TVET Academy numbers, rules, and engineering decisions. Pass mark: 65%.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div id="quiz-score-box" class="text-sm font-bold px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-800">Score: 0 / 15 (0%)</div>
+          <button id="btn-quiz-reset" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition">Restart Quiz</button>
+        </div>
+      </div>
+      <div id="quiz-container" class="space-y-4"></div>
+    </section>
+
+    <!-- TAB 4B: MOCK EXAM SET A -->
+    <section id="tab-mockexam" class="tab-panel hidden space-y-6">
+      <div class="bg-slate-900 text-white rounded-2xl border border-slate-800 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-sky-400">Cluster 1 Practice Mock Exam · Set A</span>
+          <h2 class="text-lg font-bold">Full 49-Question Interactive Mock Exam</h2>
+          <p class="text-xs text-slate-300 mt-0.5">Section A (36 MCQs) · Section B (12 Short Answers) · Section C (28-Mark Practical Briefing)</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div id="mock-score-badge" class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sky-300">Section A: 0 / 36 (0%)</div>
+          <button id="btn-mock-finish" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition">Finish &amp; Mark</button>
+          <button id="btn-mock-reset" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">Reset Exam</button>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2" id="mock-section-tabs">
+        <button type="button" data-msec="A" class="mock-sec-btn px-4 py-2 rounded-xl text-xs font-semibold bg-sky-600 text-white transition">Section A: Multiple Choice (1–36)</button>
+        <button type="button" data-msec="B" class="mock-sec-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition">Section B: Short Answers (37–48)</button>
+        <button type="button" data-msec="C" class="mock-sec-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition">Section C: Practical Scenario (49)</button>
+      </div>
+
+      <div id="mock-section-A" class="mock-sec-panel space-y-4"></div>
+      <div id="mock-section-B" class="mock-sec-panel hidden space-y-4"></div>
+      <div id="mock-section-C" class="mock-sec-panel hidden space-y-4"></div>
+    </section>
+
+    <!-- TAB 5: SUPPLIER & RISK MATRIX -->
+    <section id="tab-decisions" class="tab-panel hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Supplier Scoring Tool -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Assignment 3: Supplier Scoring Simulator (A vs. B vs. C)</h2>
+            <p class="text-xs text-slate-500">Adjust criterion weights (1–5) to see how whole-life value compares to upfront price.</p>
+          </div>
+          <div id="supplier-weights" class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200"></div>
+          <div class="relative h-64">
+            <canvas id="supplier-chart"></canvas>
+          </div>
+          <div id="supplier-summary" class="text-xs bg-sky-50 border border-sky-200 text-sky-900 p-3 rounded-xl"></div>
+        </div>
+
+        <!-- Supplier Comparison Cards -->
+        <div class="space-y-3">
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900">Supplier A — Lowest Upfront Cost</h3>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700">High Risk</span>
+            </div>
+            <ul class="text-xs text-slate-600 mt-2 space-y-1 list-disc list-inside">
+              <li>~20% cheaper than others, but <strong>does not meet every specification</strong>.</li>
+              <li>Limited local support; delivery could take <strong>8 weeks</strong> (breaks 6-week plan).</li>
+              <li>Only a <strong>1-year warranty</strong> (higher whole-life replacement cost).</li>
+            </ul>
+          </div>
+          <div class="bg-white rounded-2xl border-2 border-emerald-500 p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900">Supplier B — Recommended Best Value</h3>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Full Compliance</span>
+            </div>
+            <ul class="text-xs text-slate-600 mt-2 space-y-1 list-disc list-inside">
+              <li>Costs more upfront, but <strong>fully meets all technical specifications</strong>.</li>
+              <li><strong>3-year warranty</strong>, strong local support, faster faulty equipment replacement.</li>
+              <li>Includes <strong>basic training for ICT staff</strong> (reduces reactive maintenance risk).</li>
+            </ul>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900">Supplier C — Moderate Option</h3>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Extra Cost</span>
+            </div>
+            <ul class="text-xs text-slate-600 mt-2 space-y-1 list-disc list-inside">
+              <li>Moderate price and suitable equipment.</li>
+              <li>Academy must buy a <strong>separate support agreement</strong> (hidden whole-life cost).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8 Scored Risks Register -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Assignment 1: Case-Study Risk Register (8 Scored Risks)</h3>
+            <p class="text-xs text-slate-500">Click Likelihood or Impact to model risk score changes (Score = L × I, max 25).</p>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-500 uppercase">
+                <th class="py-2.5 px-3">Risk</th>
+                <th class="py-2.5 px-3">Likelihood (1-5)</th>
+                <th class="py-2.5 px-3">Impact (1-5)</th>
+                <th class="py-2.5 px-3">Score</th>
+                <th class="py-2.5 px-3">Mitigation from Case Study</th>
+              </tr>
+            </thead>
+            <tbody id="risk-table-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // ---------- STATE & STORAGE ----------
+    const STORAGE_KEY = 'all_saints_study_v1';
+    let state = {
+      activeTab: 'overview',
+      crisisSolved: {},
+      fcIndex: 0,
+      fcCategory: 'All',
+      fcMastered: {},
+      quizAnswers: {},
+      weights: { price: 3, specs: 5, warranty: 4, support: 4, delivery: 4 },
+      risks: [
+        { id: 'r1', name: 'Overlapping 192.168.1.0/24 IP conflicts', l: 5, i: 5, mitigation: 'Assign non-overlapping campus blocks (10.10.x.x & 10.20.x.x) & exclude static IPs from DHCP.' },
+        { id: 'r2', name: 'Switching loops & broadcast storms (10am-2pm)', l: 5, i: 4, mitigation: 'Audit undocumented switch links, enable RSTP/BPDU guard, segment into 9 VLANs.' },
+        { id: 'r3', name: '3-week switch delivery delay', l: 4, i: 5, mitigation: 'Select Supplier B with local stock/fast replacement & lock lead times in SLA.' },
+        { id: 'r4', name: '50 extra IP cameras scope creep', l: 4, i: 4, mitigation: 'Enforce formal change control; assess PoE budget, bandwidth, storage & schedule impact.' },
+        { id: 'r5', name: '4-hour St. Andrew core replacement outage', l: 5, i: 4, mitigation: 'Schedule maintenance window outside peak classes; notify staff, students & management.' },
+        { id: 'r6', name: 'Cabling contractor defects & missing tests', l: 4, i: 4, mitigation: 'Withhold final invoice until all failed points, labels & test reports are verified.' },
+        { id: 'r7', name: 'Montego Bay switch failure (5-day SLA)', l: 4, i: 5, mitigation: 'Establish preventive maintenance, UPS testing, config backups & faster SLA escalation.' },
+        { id: 'r8', name: 'Overloaded Wi-Fi (60-70 users/AP) & shared key', l: 5, i: 4, mitigation: 'Deploy separate Staff, Student & Guest SSIDs/VLANs with high-density AP placement.' }
+      ],
+      checklist: {},
+      mockA: { mc: {}, marked: false, short: {}, shortRev: {}, secC: { a: '', b: '', c: '', d: '', e: '' }, secCRev: false }
+    };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state = { ...state, ...parsed };
+        }
+      } catch (e) {}
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+      updateMasteryHeader();
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast-banner');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => el.classList.add('hidden'), 2600);
+    }
+
+    // ---------- DATA ----------
+    const faultsData = [
+      { title: 'Overlapping Addressing', severity: 'Critical', problem: 'Both campuses use 192.168.1.0/24; static printer/server IPs sit inside DHCP pools.', fix: 'Assign unique private subnets per campus & VLAN; reserve static ranges outside DHCP.' },
+      { title: 'Flat Unsegmented LAN', severity: 'Critical', problem: 'Students, staff, printers, CCTV & Finance share one network; spare ports expose HR/Finance.', fix: 'Deploy 9 VLANs with ACLs, 802.1X/port security, and isolated CCTV/management planes.' },
+      { title: 'Wi-Fi Congestion', severity: 'High', problem: '60-70 students on one AP; poor coverage; students, staff & visitors share one static password.', fix: 'Separate Staff, Student & Guest SSIDs mapped to distinct VLANs; add AP capacity.' },
+      { title: 'Switching Loops (10am-2pm)', severity: 'High', problem: 'High broadcast traffic, undocumented switch links & suspected loops slow St. Andrew daily.', fix: 'Map & remove rogue links, enable STP/RSTP + BPDU Guard, and segment broadcast domains.' },
+      { title: 'Reactive Maintenance', severity: 'High', problem: 'Dusty cabinets, untested UPS, outdated firmware, no config backups; MoBay switch failed twice.', fix: 'Implement preventive schedule, UPS tests, automated backups & strict SLA response times.' },
+      { title: 'Unreliable Site-to-Site VPN', severity: 'Critical', problem: 'Montego Bay depends on St. Andrew for SMS/LMS, but VPN is slow, unreliable, or down.', fix: 'Fix overlapping IPs, upgrade firewall/router VPN endpoints, monitor tunnel uptime.' }
+    ];
+
+    const crisisDays = [
+      {
+        day: 'Monday',
+        event: 'Montego Bay loses access to the Student Management System (SMS) and St. Andrew systems, while its Internet still works.',
+        options: [
+          { text: 'Check the site-to-site VPN tunnel, routing tables, and St. Andrew core firewall/VPN gateway immediately.', correct: true, feedback: 'Correct! Internet working proves local ISP uplink is up; the fault is isolated to the inter-campus VPN/routing path.' },
+          { text: 'Tell Montego Bay to replace all 3 computer lab switches immediately.', correct: false, feedback: 'Not the root cause—local Internet still works, pointing to the site-to-site VPN or routing between campuses.' },
+          { text: 'Wait until Friday to mention it in the weekly report.', correct: false, feedback: 'Montego Bay depends on St. Andrew for teaching & admin systems—this needs immediate incident triage.' }
+        ]
+      },
+      {
+        day: 'Tuesday',
+        event: 'The supplier says several important switches will arrive three weeks late.',
+        options: [
+          { text: 'Update the project schedule & risk register, alert the ICT Manager/Principal, and check if temporary loaner or priority units can cover critical paths.', correct: true, feedback: 'Correct! Proactive schedule adjustment, stakeholder communication, and contingency planning keep the 6-week/6-month plan controlled.' },
+          { text: 'Proceed with Montego Bay wireless AP installation anyway without PoE switches.', correct: false, feedback: 'Installing APs before PoE switches arrive causes wasted contractor visits and disputed call-out fees (as seen in the case study!).' },
+          { text: 'Cancel the entire upgrade and buy cheaper unbranded switches from Supplier A.', correct: false, feedback: 'Cheap non-compliant gear caused the current mixed-brand VLAN problems.' }
+        ]
+      },
+      {
+        day: 'Wednesday',
+        event: 'The cabling contractor claims extra payment for work it says was outside the agreed scope.',
+        options: [
+          { text: 'Review the signed scope/contract, withhold extra payment without written change approval, and cross-check against the inspection defects.', correct: true, feedback: 'Correct! Contractors need clear written instructions; unapproved extra work and incomplete/defective points cannot be paid blindly.' },
+          { text: 'Pay the extra invoice immediately so they leave the site.', correct: false, feedback: 'Paying without verification violates procurement governance and leaves defective/untested cabling unresolved.' },
+          { text: 'Ignore the claim and delete their emails.', correct: false, feedback: 'Requires formal written review and documented minutes (Assignment 4).' }
+        ]
+      },
+      {
+        day: 'Thursday',
+        event: 'The Principal formally requests 30 new IP cameras at St. Andrew and 20 at Montego Bay (50 total).',
+        options: [
+          { text: 'Log a formal Change Request assessing impact on switch ports, PoE, IP addressing, VLANs, bandwidth, storage, security, cost, and schedule.', correct: true, feedback: 'Correct! All 10 impact areas listed in the case study must be evaluated before approving scope additions.' },
+          { text: 'Plug the 50 cameras into the existing student VLAN to save time.', correct: false, feedback: 'CCTV must be isolated in its own VLAN for security and bandwidth management.' },
+          { text: 'Add them quietly without updating the budget or 6-week schedule.', correct: false, feedback: 'Uncontrolled scope creep will blow the timeline and PoE/port capacity.' }
+        ]
+      },
+      {
+        day: 'Friday',
+        event: 'The core switch at St. Andrew starts showing hardware errors and restarts twice during the day. The Principal wants an urgent briefing.',
+        options: [
+          { text: 'Deliver a concise, plain-language briefing on business impact, immediate risk mitigation (backups/failover), and the planned ~4-hour core replacement outage window.', correct: true, feedback: 'Correct! Management needs clear impact, risk, and outage communication—not raw CLI logs.' },
+          { text: 'Reboot the switch every hour during peak 10am-2pm classes without telling staff.', correct: false, feedback: 'Unannounced outages disrupt classes, labs, SMS, and admin services.' },
+          { text: 'Tell the Principal it is only a minor wireless password issue.', correct: false, feedback: 'Core switch hardware errors threaten the entire Academy network.' }
+        ]
+      }
+    ];
+
+    const vlanBlueprint = [
+      { id: 10, name: 'Administration (Finance/HR/Admin)', sa: '10.10.10.0/25 (126 hosts)', mb: '10.20.10.0/26 (62 hosts)', sec: 'Strict ACLs; block Student/Guest access; encrypted admin traffic.' },
+      { id: 20, name: 'Lecturers & Instructors', sa: '10.10.20.0/24 (254 hosts)', mb: '10.20.20.0/25 (126 hosts)', sec: 'Access to LMS/SMS & printers; isolated from Finance/HR & Management.' },
+      { id: 30, name: 'Students (Wired/BYOD)', sa: '10.10.30.0/22 (1,022 hosts)', mb: '10.20.30.0/23 (510 hosts)', sec: 'Internet + LMS only; DHCP snooping, port security, blocked from Admin/CCTV.' },
+      { id: 40, name: 'Computer Labs (4 SA / 3 MB)', sa: '10.10.40.0/23 (510 hosts)', mb: '10.20.40.0/24 (254 hosts)', sec: 'Port security (MAC limit), BPDU guard, scheduled lab policies.' },
+      { id: 50, name: 'Servers (SMS, LMS, Files)', sa: '10.10.50.0/26 (62 hosts)', mb: '10.20.50.0/27 (30 hosts)', sec: 'Static IPs outside DHCP; firewall/ACL controlled ports only.' },
+      { id: 60, name: 'Printers & Peripherals', sa: '10.10.60.0/26 (62 hosts)', mb: '10.20.60.0/27 (30 hosts)', sec: 'Static/DHCP reservations outside dynamic pool; print-server ACLs.' },
+      { id: 70, name: 'CCTV & IP Cameras (+50 new)', sa: '10.10.70.0/26 (62 hosts)', mb: '10.20.70.0/27 (30 hosts)', sec: 'Fully isolated VLAN; PoE budget & NVR storage/bandwidth QoS.' },
+      { id: 80, name: 'Guest Wireless', sa: '10.10.80.0/24 (254 hosts)', mb: '10.20.80.0/24 (254 hosts)', sec: 'Internet-only captive/guest access; client isolation; zero internal routing.' },
+      { id: 99, name: 'Network Management', sa: '10.10.99.0/26 (62 hosts)', mb: '10.20.99.0/26 (62 hosts)', sec: 'SSH/HTTPS/SNMPv3 restricted to ICT admin jump hosts only.' }
+    ];
+
+    const flashcardsData = [
+      { cat: 'Case Study Facts', q: 'How many students, lecturers, and admin staff are at St. Andrew vs. Montego Bay?', a: 'St. Andrew: ~850 students, 75 lecturers, 40 admin (4 labs). Montego Bay: ~500 students, 45 lecturers, 25 admin (3 labs).' },
+      { cat: 'Case Study Facts', q: 'What private IP network do BOTH campuses currently use, and what problem does it cause?', a: '192.168.1.0/24 at both campuses, with static IPs inside the DHCP pool—causing IP conflicts and breaking clean site-to-site VPN routing.' },
+      { cat: 'Case Study Facts', q: 'What happens at St. Andrew between 10:00 a.m. and 2:00 p.m.?', a: 'The network slows down due to high broadcast traffic, undocumented links between switches, and suspected switching loops.' },
+      { cat: 'Network Security', q: 'Which 9 VLANs must the upgrade deliver?', a: 'Administration, Lecturers, Students, Labs, Servers, Printers, CCTV, Guest Wireless, and Network Management.' },
+      { cat: 'Network Security', q: 'Why is the current flat network a major security risk for Finance and HR?', a: 'Students, staff, printers, CCTV, and admin share one network—a student plugging into a spare port can reach Finance, HR, and Student Services.' },
+      { cat: 'Network Security', q: 'What security controls are explicitly required by the upgrade brief?', a: 'ACLs, firewall policies, port security, secure device management, DHCP protection (snooping), authentication, monitoring, and CCTV/management isolation.' },
+      { cat: 'Suppliers & Contractors', q: 'Compare Supplier A, B, and C in one sentence each.', a: 'A: 20% cheaper, misses specs, 8-wk delivery, 1-yr warranty. B: Costs more, meets all specs, 3-yr warranty, local support, fast replacement, ICT training. C: Moderate price, needs separate support agreement.' },
+      { cat: 'Suppliers & Contractors', q: 'What are the St. Andrew cabling inspection findings in the Case Study vs. Assignment 4 portal brief?', a: 'Case study: 150 points total, 12 not working, 8 unlabelled, wrong patch-panel records, no test reports. Assignment 4 portal brief: 6 not working, 5 unlabelled, docs not updated, no test results.' },
+      { cat: 'Suppliers & Contractors', q: 'Why did the Montego Bay wireless contractor visit fail, and what is the contract issue?', a: 'PoE switches had not arrived, cabling was only 70% complete, and wireless VLAN design was unapproved—yet the contractor still demanded payment for the visit.' },
+      { cat: 'Project & Risk', q: 'How many extra IP cameras did the Principal request, and what 10 areas do they impact?', a: '30 at St. Andrew + 20 at Montego Bay (50 total). Impacts: switch ports, PoE, addressing, VLANs, bandwidth, storage, security, cabling, cost, and schedule.' },
+      { cat: 'Project & Risk', q: 'What is the expected downtime for replacing core equipment at St. Andrew?', a: 'About 4 hours, taking out Internet, Wi-Fi, labs, the Student Management System, and some admin services.' },
+      { cat: 'Portfolio Defence', q: 'What is the passing score, late penalty, and resubmission rule for Cluster 1?', a: '65% pass mark (out of 100). Late without notice loses 2%. Under 65% = Not Yet Competent, with 7 days to fix numbered points and resubmit.' }
+    ];
+
+    const quizData = [
+      { q: 'What is the total number of students across both All Saints TVET Academy campuses?', opts: ['1,250', '1,350', '1,535', '850'], ans: 1, exp: 'St. Andrew (~850) + Montego Bay (~500) = 1,350 students (plus 120 lecturers and 65 admin staff).' },
+      { q: 'Why is using 192.168.1.0/24 at both campuses a critical routing problem?', opts: ['It only supports 10 devices', 'Overlapping subnets prevent clean site-to-site VPN routing between campuses', 'It disables Wi-Fi', 'It blocks CCTV cameras from recording'], ans: 1, exp: 'Non-overlapping IP ranges are required so traffic routes cleanly across the St. Andrew–Montego Bay VPN.' },
+      { q: 'During which hours does the St. Andrew network slow down due to suspected switching loops?', opts: ['8:00 a.m. – 10:00 a.m.', '10:00 a.m. – 2:00 p.m.', '2:00 p.m. – 5:00 p.m.', '6:00 p.m. – 9:00 p.m.'], ans: 1, exp: 'The case study specifies 10:00 a.m. to 2:00 p.m. with high broadcast traffic and undocumented switch links.' },
+      { q: 'How many students are currently connecting to a single wireless access point in overloaded areas?', opts: ['15 to 20', '30 to 40', '60 to 70', '100 to 120'], ans: 2, exp: '60 to 70 students on one AP in some areas, while sharing one rarely changed password with staff and visitors.' },
+      { q: 'How long does the current maintenance provider say a replacement for the failed Montego Bay switch could take?', opts: ['Same day', 'Up to 2 business days', 'Up to 5 business days', '8 weeks'], ans: 2, exp: 'The Montego Bay switch failed twice in the past year and replacement takes up to 5 business days.' },
+      { q: 'Why is Supplier A (~20% cheaper) a poor choice for the 6-week / 6-month upgrade?', opts: ['It has a 5-year warranty', 'Equipment misses specs, local support is limited, delivery takes 8 weeks, and warranty is only 1 year', 'It includes free ICT staff training', 'It requires a separate support agreement'], ans: 1, exp: 'Cheapest upfront is not best whole-life value: 8-week delivery and 1-year warranty create major operational risk.' },
+      { q: 'Which supplier includes basic training for the ICT staff and a 3-year warranty?', opts: ['Supplier A', 'Supplier B', 'Supplier C', 'None of them'], ans: 1, exp: 'Supplier B fully meets specs, offers a 3-year warranty, local support, faster replacement, and basic ICT staff training.' },
+      { q: 'In the Assignment 4 portal brief, which inspection findings must you use for the cabling close-out?', opts: ['12 points not working, 8 unlabelled', '6 network points not working, 5 cables not labelled, docs not updated, no test results', '70% cabling complete', '150 points passed'], ans: 1, exp: 'Assignment 4 explicitly instructs using the portal brief numbers: 6 not working, 5 not labelled, no updated docs, no test results.' },
+      { q: 'What happened when the wireless contractor arrived at Montego Bay?', opts: ['They finished ahead of schedule', 'PoE switches had not arrived, cabling was 70% complete, and wireless VLAN design was not approved', 'The Principal cancelled Wi-Fi', 'All APs were installed on VLAN 10'], ans: 1, exp: 'Poor coordination meant prerequisites were missing, yet the contractor still demanded payment for the visit.' },
+      { q: 'How many extra IP cameras did the Principal request partway through the project?', opts: ['20 total', '30 total', '50 total (30 at St. Andrew, 20 at Montego Bay)', '150 total'], ans: 2, exp: '30 new IP cameras at St. Andrew + 20 at Montego Bay = 50 cameras outside the original scope.' },
+      { q: 'On "The Week Everything Happened", what happened on Monday?', opts: ['Core switch at St. Andrew restarted twice', 'Montego Bay lost access to SMS & St. Andrew systems while Internet still worked', 'Switches were delayed 3 weeks', 'Principal requested cameras'], ans: 1, exp: 'Monday: Montego Bay lost SMS/St. Andrew access while its local Internet still worked (VPN/routing fault).' },
+      { q: 'How long could replacing the core equipment at St. Andrew shut down the network?', opts: ['30 minutes', 'About 4 hours', '5 business days', '24 hours'], ans: 1, exp: 'The first test/core replacement may shut down Internet, Wi-Fi, labs, SMS, and some admin services for about 4 hours.' },
+      { q: 'What is the minimum passing mark for each Cluster 1 assignment?', opts: ['50%', '60%', '65%', '75%'], ans: 2, exp: 'Each assignment is marked out of 100 and requires 65% to pass.' },
+      { q: 'Which file format and naming convention is required when uploading to vspportal.vercel.app?', opts: ['ZIP file named Group_Assignment.zip', 'One PDF named Assignment_Title_GroupName', 'DOCX file', 'Multiple PNGs'], ans: 1, exp: 'Hand in one PDF (not ZIP) named Assignment_Title_GroupName, uploaded individually by each group member.' },
+      { q: 'Which 9th VLAN completes this list: Admin, Lecturers, Students, Labs, Servers, Printers, CCTV, Guest Wireless, and ___?', opts: ['VoIP', 'Network Management', 'DMZ', 'Storage'], ans: 1, exp: 'Network Management is the 9th required VLAN so device management is restricted and isolated.' }
+    ];
+
+    // ---------- TAB NAVIGATION ----------
+    const navTabs = document.querySelectorAll('.nav-tab');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+      navTabs.forEach(btn => {
+        const active = btn.dataset.tab === tabId;
+        btn.classList.toggle('bg-sky-600', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('text-slate-300', !active);
+        btn.classList.toggle('hover:bg-slate-800', !active);
+      });
+      tabPanels.forEach(panel => {
+        panel.classList.toggle('hidden', panel.id !== `tab-${tabId}`);
+      });
+      if (tabId === 'decisions') renderSupplierChart();
+      saveState();
+    }
+    navTabs.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
+    // ---------- TAB 1: FAULTS & CRISIS SIMULATOR ----------
+    function renderFaults() {
+      const grid = document.getElementById('faults-grid');
+      grid.innerHTML = faultsData.map((f, idx) => `
+        <button type="button" data-fault="${idx}" class="fault-card text-left p-4 rounded-xl border border-slate-200 bg-slate-50 hover:border-sky-400 hover:bg-sky-50/40 transition">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-sm font-bold text-slate-900">${f.title}</span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${f.severity === 'Critical' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800'}">${f.severity}</span>
+          </div>
+          <p class="text-xs text-slate-600">${f.problem}</p>
+          <div id="fault-fix-${idx}" class="hidden mt-2.5 pt-2.5 border-t border-slate-200 text-xs text-emerald-800 bg-emerald-50 p-2 rounded-lg">
+            <strong>Upgrade Fix:</strong> ${f.fix}
+          </div>
+        </button>
+      `).join('');
+      grid.querySelectorAll('.fault-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const fixEl = document.getElementById(`fault-fix-${card.dataset.fault}`);
+          fixEl.classList.toggle('hidden');
+        });
+      });
+    }
+
+    let activeCrisisDay = 0;
+    function renderCrisis() {
+      const dayBtns = document.getElementById('crisis-day-buttons');
+      dayBtns.innerHTML = crisisDays.map((d, idx) => {
+        const solved = state.crisisSolved[d.day];
+        const isActive = idx === activeCrisisDay;
+        return `<button type="button" data-day="${idx}" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
+          isActive ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+        }">${d.day} ${solved ? '✓' : ''}</button>`;
+      }).join('');
+      dayBtns.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+        activeCrisisDay = Number(b.dataset.day);
+        renderCrisis();
+      }));
+
+      const item = crisisDays[activeCrisisDay];
+      const panel = document.getElementById('crisis-panel');
+      panel.innerHTML = `
+        <div class="text-xs font-semibold uppercase tracking-wider text-rose-600 mb-1">${item.day} Incident</div>
+        <p class="text-sm font-semibold text-slate-900 mb-3">${item.event}</p>
+        <div class="space-y-2" id="crisis-options">
+          ${item.options.map((opt, idx) => `
+            <button type="button" data-opt="${idx}" class="w-full text-left text-xs p-3 rounded-lg border border-slate-200 bg-white hover:border-sky-400 transition">
+              ${opt.text}
+            </button>
+          `).join('')}
+        </div>
+        <div id="crisis-feedback" class="hidden mt-3 text-xs p-3 rounded-lg border"></div>
+      `;
+      panel.querySelectorAll('#crisis-options button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const opt = item.options[Number(btn.dataset.opt)];
+          const fb = document.getElementById('crisis-feedback');
+          fb.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-900', 'bg-rose-50', 'border-rose-200', 'text-rose-900');
+          if (opt.correct) {
+            fb.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-900');
+            state.crisisSolved[item.day] = true;
+            saveState();
+            renderCrisis();
+            const newFb = document.getElementById('crisis-feedback');
+            newFb.textContent = opt.feedback;
+            newFb.classList.remove('hidden');
+            newFb.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-900');
+          } else {
+            fb.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-900');
+            fb.textContent = opt.feedback;
+          }
+        });
+      });
+
+      const solvedCount = Object.keys(state.crisisSolved).length;
+      document.getElementById('crisis-score-badge').textContent = `${solvedCount} / ${crisisDays.length} Resolved`;
+    }
+
+    // ---------- TAB 2: SUBNETTING & VLANS ----------
+    function ipToInt(ip) {
+      const parts = ip.trim().split('.').map(Number);
+      if (parts.length !== 4 || parts.some(p => Number.isNaN(p) || p < 0 || p > 255)) return null;
+      return ((parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3]) >>> 0;
+    }
+    function intToIp(num) {
+      return [(num >>> 24) & 255, (num >>> 16) & 255, (num >>> 8) & 255, num & 255].join('.');
+    }
+    function calcSubnet(ipStr, cidr) {
+      const ipInt = ipToInt(ipStr);
+      if (ipInt === null || cidr < 8 || cidr > 30) return null;
+      const maskInt = cidr === 0 ? 0 : (0xffffffff << (32 - cidr)) >>> 0;
+      const netInt = (ipInt & maskInt) >>> 0;
+      const bcastInt = (netInt | (~maskInt >>> 0)) >>> 0;
+      const total = Math.pow(2, 32 - cidr);
+      return {
+        network: intToIp(netInt),
+        mask: intToIp(maskInt),
+        broadcast: intToIp(bcastInt),
+        firstHost: intToIp(netInt + 1),
+        lastHost: intToIp(bcastInt - 1),
+        usable: total - 2
+      };
+    }
+
+    function updateCalculator() {
+      const ip = document.getElementById('calc-ip').value;
+      const cidr = parseInt(document.getElementById('calc-cidr').value, 10);
+      const res = calcSubnet(ip, cidr);
+      const box = document.getElementById('calc-results');
+      if (!res) {
+        box.innerHTML = `<div class="col-span-2 text-rose-600 font-medium">Enter a valid IPv4 address and CIDR (/8 to /30).</div>`;
+        return;
+      }
+      box.innerHTML = `
+        <div><span class="text-slate-500">Network ID:</span> <strong class="text-slate-900">${res.network}/${cidr}</strong></div>
+        <div><span class="text-slate-500">Subnet Mask:</span> <strong class="text-slate-900">${res.mask}</strong></div>
+        <div><span class="text-slate-500">Usable Range:</span> <strong class="text-slate-900">${res.firstHost} – ${res.lastHost}</strong></div>
+        <div><span class="text-slate-500">Broadcast:</span> <strong class="text-slate-900">${res.broadcast}</strong></div>
+        <div class="col-span-2 pt-1 border-t border-slate-200"><span class="text-slate-500">Usable Hosts:</span> <strong class="text-emerald-700">${res.usable.toLocaleString()}</strong></div>
+      `;
+    }
+    document.getElementById('calc-ip').addEventListener('input', updateCalculator);
+    document.getElementById('calc-cidr').addEventListener('input', updateCalculator);
+    document.querySelectorAll('.preset-cidr').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const [ip, cidr] = btn.dataset.preset.split('/');
+        document.getElementById('calc-ip').value = ip;
+        document.getElementById('calc-cidr').value = cidr;
+        updateCalculator();
+      });
+    });
+
+    const drillPool = [
+      { label: 'St. Andrew CCTV (+30 new cameras)', ip: '10.10.70.25', cidr: 26 },
+      { label: 'Montego Bay Admin Office', ip: '10.20.10.19', cidr: 26 },
+      { label: 'St. Andrew Computer Labs (4 labs)', ip: '10.10.40.140', cidr: 23 },
+      { label: 'Montego Bay Lecturers', ip: '10.20.20.88', cidr: 25 },
+      { label: 'Network Management VLAN', ip: '10.10.99.44', cidr: 26 }
+    ];
+    let currentDrill = drillPool[0];
+    function loadDrill() {
+      currentDrill = drillPool[Math.floor(Math.random() * drillPool.length)];
+      document.getElementById('drill-prompt').innerHTML = `
+        <div class="text-xs text-sky-400 font-semibold uppercase mb-1">${currentDrill.label}</div>
+        <div>Find the Network Address, Broadcast Address, and Usable Hosts for <code class="text-amber-300 font-bold">${currentDrill.ip}/${currentDrill.cidr}</code></div>
+      `;
+      document.getElementById('drill-net').value = '';
+      document.getElementById('drill-bcast').value = '';
+      document.getElementById('drill-hosts').value = '';
+      document.getElementById('drill-feedback').classList.add('hidden');
+    }
+    document.getElementById('btn-new-drill').addEventListener('click', loadDrill);
+    document.getElementById('btn-check-drill').addEventListener('click', () => {
+      const sol = calcSubnet(currentDrill.ip, currentDrill.cidr);
+      const uNet = document.getElementById('drill-net').value.trim();
+      const uBcast = document.getElementById('drill-bcast').value.trim();
+      const uHosts = parseInt(document.getElementById('drill-hosts').value, 10);
+      const fb = document.getElementById('drill-feedback');
+      fb.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-900', 'bg-rose-50', 'border-rose-200', 'text-rose-900');
+      if (uNet === sol.network && uBcast === sol.broadcast && uHosts === sol.usable) {
+        fb.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-900');
+        fb.textContent = `Spot on! ${sol.network}/${currentDrill.cidr} supports ${sol.usable} usable hosts (${sol.firstHost} – ${sol.lastHost}).`;
+      } else {
+        fb.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-900');
+        fb.textContent = `Not quite—check your subnet mask boundary for /${currentDrill.cidr} or click Show Solution.`;
+      }
+    });
+    document.getElementById('btn-reveal-drill').addEventListener('click', () => {
+      const sol = calcSubnet(currentDrill.ip, currentDrill.cidr);
+      document.getElementById('drill-net').value = sol.network;
+      document.getElementById('drill-bcast').value = sol.broadcast;
+      document.getElementById('drill-hosts').value = sol.usable;
+      const fb = document.getElementById('drill-feedback');
+      fb.classList.remove('hidden', 'bg-rose-50', 'border-rose-200', 'text-rose-900');
+      fb.classList.add('bg-sky-50', 'border-sky-200', 'text-sky-900');
+      fb.textContent = `Solution: Network ${sol.network}, Broadcast ${sol.broadcast}, ${sol.usable} usable hosts.`;
+    });
+
+    function renderVlanTable() {
+      document.getElementById('vlan-table-body').innerHTML = vlanBlueprint.map(v => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-3 font-bold text-sky-700">${v.id}</td>
+          <td class="py-2.5 px-3 font-semibold text-slate-900">${v.name}</td>
+          <td class="py-2.5 px-3 font-mono text-slate-700">${v.sa}</td>
+          <td class="py-2.5 px-3 font-mono text-slate-700">${v.mb}</td>
+          <td class="py-2.5 px-3 text-slate-600">${v.sec}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ---------- TAB 3: FLASHCARDS ----------
+    let filteredCards = [...flashcardsData];
+    function renderFlashcards() {
+      const cats = ['All', ...new Set(flashcardsData.map(c => c.cat))];
+      const filterEl = document.getElementById('fc-category-filters');
+      filterEl.innerHTML = cats.map(c => `
+        <button type="button" data-cat="${c}" class="px-3 py-1 rounded-lg text-xs font-semibold transition ${
+          state.fcCategory === c ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+        }">${c}</button>
+      `).join('');
+      filterEl.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+        state.fcCategory = b.dataset.cat;
+        state.fcIndex = 0;
+        document.getElementById('flashcard-inner').classList.remove('is-flipped');
+        renderFlashcards();
+      }));
+
+      filteredCards = state.fcCategory === 'All' ? [...flashcardsData] : flashcardsData.filter(c => c.cat === state.fcCategory);
+      if (state.fcIndex >= filteredCards.length) state.fcIndex = 0;
+      const card = filteredCards[state.fcIndex];
+      document.getElementById('fc-counter').textContent = `Card ${state.fcIndex + 1} of ${filteredCards.length}`;
+      document.getElementById('fc-front-cat').textContent = card.cat;
+      document.getElementById('fc-front-text').textContent = card.q;
+      document.getElementById('fc-back-text').textContent = card.a;
+      const isMastered = state.fcMastered[card.q];
+      document.getElementById('fc-status-label').textContent = isMastered === true ? 'Mastered ✓' : isMastered === false ? 'Marked for Review' : 'Unreviewed';
+    }
+    document.getElementById('flashcard-inner').addEventListener('click', function () {
+      this.classList.toggle('is-flipped');
+    });
+    document.getElementById('btn-fc-prev').addEventListener('click', () => {
+      document.getElementById('flashcard-inner').classList.remove('is-flipped');
+      state.fcIndex = (state.fcIndex - 1 + filteredCards.length) % filteredCards.length;
+      renderFlashcards();
+    });
+    document.getElementById('btn-fc-next').addEventListener('click', () => {
+      document.getElementById('flashcard-inner').classList.remove('is-flipped');
+      state.fcIndex = (state.fcIndex + 1) % filteredCards.length;
+      renderFlashcards();
+    });
+    document.getElementById('btn-fc-mastered').addEventListener('click', () => {
+      const card = filteredCards[state.fcIndex];
+      state.fcMastered[card.q] = true;
+      saveState();
+      document.getElementById('flashcard-inner').classList.remove('is-flipped');
+      state.fcIndex = (state.fcIndex + 1) % filteredCards.length;
+      renderFlashcards();
+    });
+    document.getElementById('btn-fc-review').addEventListener('click', () => {
+      const card = filteredCards[state.fcIndex];
+      state.fcMastered[card.q] = false;
+      saveState();
+      document.getElementById('flashcard-inner').classList.remove('is-flipped');
+      state.fcIndex = (state.fcIndex + 1) % filteredCards.length;
+      renderFlashcards();
+    });
+    document.getElementById('btn-fc-shuffle').addEventListener('click', () => {
+      flashcardsData.sort(() => Math.random() - 0.5);
+      state.fcIndex = 0;
+      document.getElementById('flashcard-inner').classList.remove('is-flipped');
+      renderFlashcards();
+      showToast('Flashcards shuffled');
+    });
+
+    // ---------- TAB 4: QUIZ ----------
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = quizData.map((q, qIdx) => {
+        const chosen = state.quizAnswers[qIdx];
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <div class="text-sm font-bold text-slate-900 mb-3">${qIdx + 1}. ${q.q}</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              ${q.opts.map((opt, oIdx) => {
+                let cls = 'border-slate-200 bg-slate-50 hover:border-sky-400 text-slate-800';
+                if (chosen !== undefined) {
+                  if (oIdx === q.ans) cls = 'border-emerald-500 bg-emerald-50 text-emerald-900 font-semibold';
+                  else if (oIdx === chosen) cls = 'border-rose-500 bg-rose-50 text-rose-900';
+                  else cls = 'border-slate-200 bg-slate-50 text-slate-400';
+                }
+                return `<button type="button" data-q="${qIdx}" data-o="${oIdx}" class="quiz-opt text-left text-xs p-3 rounded-xl border transition ${cls}">${opt}</button>`;
+              }).join('')}
+            </div>
+            ${chosen !== undefined ? `<div class="mt-3 text-xs p-2.5 rounded-lg ${chosen === q.ans ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-900'}">${q.exp}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('.quiz-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const qi = Number(btn.dataset.q);
+          if (state.quizAnswers[qi] !== undefined) return;
+          state.quizAnswers[qi] = Number(btn.dataset.o);
+          saveState();
+          renderQuiz();
+        });
+      });
+
+      const correct = quizData.reduce((acc, q, idx) => acc + (state.quizAnswers[idx] === q.ans ? 1 : 0), 0);
+      const pct = Math.round((correct / quizData.length) * 100);
+      const box = document.getElementById('quiz-score-box');
+      box.textContent = `Score: ${correct} / ${quizData.length} (${pct}%)`;
+      box.className = `text-sm font-bold px-3.5 py-1.5 rounded-xl ${pct >= 65 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'}`;
+    }
+    document.getElementById('btn-quiz-reset').addEventListener('click', () => {
+      state.quizAnswers = {};
+      saveState();
+      renderQuiz();
+      showToast('Quiz reset');
+    });
+
+    // ---------- TAB 5: SUPPLIER & RISK MATRIX ----------
+    const supplierScores = {
+      A: { price: 5, specs: 2, warranty: 1, support: 1, delivery: 1 },
+      B: { price: 2, specs: 5, warranty: 5, support: 5, delivery: 5 },
+      C: { price: 3, specs: 4, warranty: 3, support: 2, delivery: 3 }
+    };
+    const criteriaLabels = {
+      price: 'Upfront Price',
+      specs: 'Meets Tech Specs',
+      warranty: 'Warranty (1–3 yrs)',
+      support: 'Local Support & Training',
+      delivery: 'Delivery & Replacement Speed'
+    };
+    let supplierChartInstance = null;
+
+    function renderSupplierWeights() {
+      const el = document.getElementById('supplier-weights');
+      el.innerHTML = Object.keys(criteriaLabels).map(key => `
+        <div>
+          <div class="flex justify-between text-xs font-medium text-slate-700 mb-1">
+            <span>${criteriaLabels[key]}</span>
+            <span class="font-bold text-sky-700">${state.weights[key]}</span>
+          </div>
+          <input type="range" min="1" max="5" value="${state.weights[key]}" data-w="${key}" class="weight-slider w-full accent-sky-600" />
+        </div>
+      `).join('');
+      el.querySelectorAll('.weight-slider').forEach(slider => {
+        slider.addEventListener('input', () => {
+          state.weights[slider.dataset.w] = Number(slider.value);
+          saveState();
+          renderSupplierWeights();
+          renderSupplierChart();
+        });
+      });
+    }
+
+    function renderSupplierChart() {
+      const calcTotal = (sup) => Object.keys(state.weights).reduce((s, k) => s + state.weights[k] * supplierScores[sup][k], 0);
+      const totals = [calcTotal('A'), calcTotal('B'), calcTotal('C')];
+      const maxVal = Object.values(state.weights).reduce((a, b) => a + b * 5, 0);
+      const bestIdx = totals.indexOf(Math.max(...totals));
+      const names = ['Supplier A', 'Supplier B', 'Supplier C'];
+      document.getElementById('supplier-summary').innerHTML = `<strong>Weighted Leader:</strong> ${names[bestIdx]} (${totals[bestIdx]} / ${maxVal} pts). Even when price is weighted heavily, Supplier A's 8-week lead time, 1-year warranty, and missing specs create higher whole-life cost.`;
+
+      const ctx = document.getElementById('supplier-chart').getContext('2d');
+      if (supplierChartInstance) {
+        supplierChartInstance.data.datasets[0].data = totals;
+        supplierChartInstance.update();
+        return;
+      }
+      supplierChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Supplier A (Cheapest)', 'Supplier B (Full Spec)', 'Supplier C (Moderate)'],
+          datasets: [{
+            label: 'Weighted Score',
+            data: totals,
+            backgroundColor: ['#f43f5e', '#10b981', '#f59e0b'],
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function renderRiskTable() {
+      document.getElementById('risk-table-body').innerHTML = state.risks.map((r, idx) => {
+        const score = r.l * r.i;
+        const badge = score >= 16 ? 'bg-rose-100 text-rose-800' : score >= 9 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800';
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2.5 px-3 font-semibold text-slate-900">${r.name}</td>
+            <td class="py-2.5 px-3"><input type="number" min="1" max="5" value="${r.l}" data-r="${idx}" data-field="l" class="risk-input w-14 px-2 py-1 border border-slate-300 rounded text-center" /></td>
+            <td class="py-2.5 px-3"><input type="number" min="1" max="5" value="${r.i}" data-r="${idx}" data-field="i" class="risk-input w-14 px-2 py-1 border border-slate-300 rounded text-center" /></td>
+            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded-full font-bold ${badge}">${score}</span></td>
+            <td class="py-2.5 px-3 text-slate-600">${r.mitigation}</td>
+          </tr>
+        `;
+      }).join('');
+      document.querySelectorAll('.risk-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const val = Math.min(5, Math.max(1, Number(inp.value) || 1));
+          state.risks[Number(inp.dataset.r)][inp.dataset.field] = val;
+          saveState();
+          renderRiskTable();
+        });
+      });
+    }
+
+    // ---------- MASTERY & RESET ----------
+    function updateMasteryHeader() {
+      const fcTotal = flashcardsData.length;
+      const fcDone = Object.values(state.fcMastered).filter(v => v === true).length;
+      const qDone = quizData.reduce((acc, q, idx) => acc + (state.quizAnswers[idx] === q.ans ? 1 : 0), 0);
+      const cDone = Object.keys(state.crisisSolved).length;
+      const total = fcTotal + quizData.length + crisisDays.length;
+      const pct = Math.round(((fcDone + qDone + cDone) / total) * 100);
+      document.getElementById('header-mastery').textContent = `${pct}%`;
+    }
+
+    document.getElementById('btn-reset-progress').addEventListener('click', () => {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      state.crisisSolved = {};
+      state.fcMastered = {};
+      state.quizAnswers = {};
+      state.checklist = {};
+      renderCrisis();
+      renderFlashcards();
+      renderQuiz();
+      updateMasteryHeader();
+      showToast('Study progress reset');
+    });
+
+    // ---------- MOCK EXAM: SET A ----------
+    const mockSetA_MC = [
+      { q: '1. About how many students attend the St. Andrew campus?', opts: ['500', '650', '850', '1,350'], ans: 2 },
+      { q: '2. Which statement about the Montego Bay campus is correct?', opts: ['It hosts the Student Management System.', 'It has 3 computer labs and depends on St. Andrew through a site-to-site VPN.', 'It has the main server room.', 'It has 75 lecturers and instructors.'], ans: 1 },
+      { q: '3. Both campuses currently use which private network?', opts: ['192.168.1.0/24', '10.0.0.0/8', '172.16.0.0/16', '192.168.100.0/24'], ans: 0 },
+      { q: '4. Why is it a problem that both campuses use the same address range?', opts: ['It limits Internet speed.', 'It breaks the Wi-Fi password.', 'It stops DHCP working altogether.', 'Traffic cannot route correctly between the campuses.'], ans: 3 },
+      { q: '5. What causes the address conflicts in the case study?', opts: ['Too many VLANs', 'Static addresses set inside the DHCP pool', 'Two DNS servers', 'Guest Wi-Fi'], ans: 1 },
+      { q: '6. In some areas, how many students share one wireless access point?', opts: ['10 to 15', '20 to 25', '35 to 40', '60 to 70'], ans: 3 },
+      { q: '7. When does the St. Andrew network slow down?', opts: ['10:00 a.m. to 2:00 p.m.', '8:00 to 10:00 a.m.', '2:00 to 4:00 p.m.', 'After 6:00 p.m.'], ans: 0 },
+      { q: '8. About how long could replacing the core equipment at St. Andrew shut the network down?', opts: ['15 minutes', '1 hour', 'About 4 hours', '2 days'], ans: 2 },
+      { q: '9. A major Montego Bay switch has failed how many times in the past year, and how long could replacement take?', opts: ['Once, one day', 'Twice, up to five business days', 'Three times, two weeks', 'Twice, up to eight weeks'], ans: 1 },
+      { q: '10. What does a VLAN do?', opts: ['Logically separates groups of devices that share the same switches', 'Encrypts all wireless traffic', 'Increases Internet bandwidth', 'Backs up device configurations'], ans: 0 },
+      { q: '11. What does DHCP do?', opts: ['Translates names into IP addresses', 'Filters unwanted traffic', 'Automatically assigns IP addresses to devices', 'Powers access points'], ans: 2 },
+      { q: '12. What does DNS do?', opts: ['Routes traffic between VLANs', 'Powers devices over the cable', 'Blocks malicious traffic', 'Translates domain names into IP addresses'], ans: 3 },
+      { q: '13. What is the subnet mask for a /24 network?', opts: ['255.0.0.0', '255.255.255.0', '255.255.0.0', '255.255.255.128'], ans: 1 },
+      { q: '14. How many usable host addresses are in a /24 network?', opts: ['254', '256', '255', '24'], ans: 0 },
+      { q: '15. Which devices usually form the two ends of a site-to-site VPN?', opts: ['Unmanaged switches', 'Patch panels', 'Routers or firewalls at each campus', 'UPS units'], ans: 2 },
+      { q: '16. What does Power over Ethernet (PoE) do?', opts: ['Provides faster fibre links', 'Provides backup battery power', 'Encrypts traffic', 'Delivers power to devices, such as access points, over the network cable'], ans: 3 },
+      { q: '17. Why can an unmanaged switch not meet this project’s specifications?', opts: ['It has too many ports.', 'It cannot provide VLANs, security features or monitoring.', 'It is too fast.', 'It needs PoE.'], ans: 1 },
+      { q: '18. What is an access control list (ACL)?', opts: ['A list of suppliers', 'A list of wireless passwords', 'A set of rules that permit or deny traffic', 'A list of change requests'], ans: 2 },
+      { q: '19. Devices in different VLANs communicate through which of these?', opts: ['A repeater', 'A hub', 'A patch panel', 'A router or layer 3 switch'], ans: 3 },
+      { q: '20. What is the purpose of a work excluded (out of scope) list?', opts: ['It states what the project will not do, avoiding misunderstandings and scope creep.', 'It lists the project risks.', 'It ranks the suppliers.', 'It schedules the tasks.'], ans: 0 },
+      { q: '21. How is a risk score commonly calculated?', opts: ['Cost multiplied by time', 'Impact divided by probability', 'Probability multiplied by impact', 'Probability plus budget'], ans: 2 },
+      { q: '22. Which risk response shifts a risk to another party, for example through a contract or warranty?', opts: ['Avoid', 'Transfer', 'Accept', 'Mitigate'], ans: 1 },
+      { q: '23. What is scope creep?', opts: ['A formally approved change', 'A contractor delay', 'A type of risk response', 'Uncontrolled growth of the scope without adjusting time, cost or approval'], ans: 3 },
+      { q: '24. The Principal asks for 50 extra cameras. What is the correct first step?', opts: ['Record the request in writing and assess its impact', 'Tell the contractor to install them now', 'Refuse without recording the request', 'Add them to the schedule'], ans: 0 },
+      { q: '25. What is reactive maintenance?', opts: ['Scheduled checks every month', 'Replacing equipment before it is old', 'Fixing equipment only after it fails', 'Monitoring with software'], ans: 2 },
+      { q: '26. Which is an example of preventive maintenance?', opts: ['Replacing a switch that has failed', 'Waiting for complaints', 'Reporting faults by word of mouth', 'Cleaning cabinets, testing UPS batteries and updating firmware on a schedule'], ans: 3 },
+      { q: '27. What is a service level agreement (SLA)?', opts: ['A price list', 'An agreement that states how fast a provider must respond and restore service', 'A network diagram', 'A warranty extension'], ans: 1 },
+      { q: '28. Which is a reason not to choose Supplier A just because it is the cheapest?', opts: ['It does not meet every specification and delivery could take eight weeks.', 'It offers a three-year warranty.', 'It needs a separate support agreement.', 'It costs more than the others.'], ans: 0 },
+      { q: '29. What is whole-life cost?', opts: ['The purchase price only', 'The purchase price minus any discount', 'The total cost over the equipment’s life, including support, warranty, downtime and training', 'Delivery cost only'], ans: 2 },
+      { q: '30. What is a must-have specification?', opts: ['An optional extra', 'A feature that raises the price', 'A brand preference', 'A requirement that equipment must meet or be rejected'], ans: 3 },
+      { q: '31. How is a weighted score calculated?', opts: ['Add up the prices', 'Multiply each score by its weight and add the results', 'Choose the highest price', 'Average the warranties'], ans: 1 },
+      { q: '32. The cabling contractor invoices for 100 percent, but inspection finds 12 points not working, 8 cables unlabelled, patch-panel ports recorded wrongly and no test reports. What is the best decision?', opts: ['Withhold or part approve payment until the faults are corrected and evidence is supplied', 'Approve the full invoice and correct the faults later', 'Reject it without recording reasons', 'Pay in full and ask for a discount'], ans: 0 },
+      { q: '33. Which document shows that each installed connection actually works?', opts: ['Network diagram', 'Invoice', 'Test report', 'Change request'], ans: 2 },
+      { q: '34. At Montego Bay the wireless contractor cannot install the access points. What is the main reason?', opts: ['The contractor is unqualified.', 'Supplier C’s support is limited.', 'The budget has run out.', 'The PoE switches have not arrived, cabling is only 70 percent complete and the wireless VLAN design is not approved.'], ans: 3 },
+      { q: '35. What is the purpose of a close-out checklist?', opts: ['To start the project', 'To confirm that work, testing, documentation, records, warranties, maintenance arrangements and sign-offs are complete before closing', 'To list the suppliers', 'To claim extra payment'], ans: 1 },
+      { q: '36. Why is adding 50 cameras at the final stage of a six-week project risky?', opts: ['It affects ports, PoE, addressing, VLANs, bandwidth, storage, security, cabling, cost and schedule.', 'It reduces the number of users.', 'It removes the need for a firewall.', 'It makes the VPN faster.'], ans: 0 }
+    ];
+
+    const mockSetA_Short = [
+      { q: '37. Name three problems with the wireless network described in the case study.', model: '1) Overloaded APs with 60 to 70 students on one access point in some areas. 2) Poor wireless coverage in other areas. 3) Students, staff, and visitors share one network and one password that is rarely changed.' },
+      { q: '38. Explain why a student plugging into a spare port could reach Finance devices, and name the control that fixes this.', model: 'Why: Students, staff, printers, CCTV, and admin devices currently share one flat, unsegmented network (192.168.1.0/24). Control: VLAN segmentation (separating Student and Admin/Finance VLANs) combined with port security (MAC limits/802.1X) and ACLs.' },
+      { q: '39. Define project scope and explain why a work excluded list matters.', model: 'Project scope defines the exact deliverables, boundaries, and work the project will complete. A work excluded (out-of-scope) list explicitly states what the project will not do, preventing misunderstandings and uncontrolled scope creep.' },
+      { q: '40. A risk has a probability of 4 and an impact of 5. Calculate its score and give one response, using the St. Andrew core switch as the example.', model: 'Score = 4 × 5 = 20 (Critical). Response (Mitigate): Back up switch configurations immediately, procure/stage a replacement switch with a fast SLA, and schedule the ~4-hour replacement outside peak class hours with advance notice.' },
+      { q: '41. Describe the steps of change control that apply to the request for 50 cameras.', model: '1) Record the Principal’s request in writing. 2) Assess impact on switch ports, PoE, addressing, VLANs, bandwidth, storage, security, cabling, cost, and schedule. 3) Submit for formal approval, deferral, or rejection. 4) Update scope, budget, and schedule before work starts.' },
+      { q: '42. Explain the difference between reactive and preventive maintenance and give two preventive tasks that suit this case study.', model: 'Reactive maintenance fixes equipment only after it fails; preventive maintenance uses scheduled checks to stop failures early. Tasks: (1) Cleaning dusty cabinets and testing UPS batteries; (2) Updating firmware and taking regular configuration backups.' },
+      { q: '43. Give two reasons Supplier A could cost the Academy more over its life, even though it is about 20 percent cheaper.', model: '1) Only a 1-year warranty and limited local support increase future repair/replacement costs and downtime. 2) Equipment does not meet all specifications and takes 8 weeks to deliver, risking delays and premature replacement.' },
+      { q: '44. Show how to calculate the number of access points for the 570 people at Montego Bay, using 20 users per access point. State your assumption.', model: '570 ÷ 20 = 28.5 → 29 access points (rounded up). Assumption: All 570 people (500 students, 45 lecturers, 25 admin staff) may connect concurrently, and each AP reliably supports 20 active users without coverage dead zones.' },
+      { q: '45. List three things staff and students must be told before the planned four-hour outage.', model: '1) Exact date, start time, and expected duration (~4 hours). 2) Which services will be down (Internet, Wi-Fi, labs, SMS, and some admin services). 3) Support contact details and when normal service will resume.' },
+      { q: '46. The contractor says: "Approve the invoice now and we will correct the remaining network points afterward." Explain why you should not simply agree.', model: 'Paying 100% upfront removes financial leverage to compel fixes for the 12 non-working points, 8 unlabelled cables, wrong patch-panel records, and missing test reports. Withhold or part-approve payment until verified evidence is supplied.' },
+      { q: '47. Name three items from the close-out checklist and the evidence for each.', model: '1) All points tested and working → signed test reports. 2) Updated documentation & labelling → as-built network diagrams & patch-panel schedules. 3) Warranties & ongoing support → warranty certificates & signed maintenance SLA.' },
+      { q: '48. Explain why a maintenance agreement should state clearly whether an emergency delivery charge applies and how fast replacement equipment must arrive.', model: 'Clear SLA terms prevent surprise billing disputes over emergency delivery fees and prevent multi-day outages (like waiting up to 5 business days for a Montego Bay switch), letting Finance and ICT enforce accountability.' }
+    ];
+
+    let activeMockSec = 'A';
+    function renderMockExam() {
+      const m = state.mockA || { mc: {}, marked: false, short: {}, shortRev: {}, secC: { a: '', b: '', c: '', d: '', e: '' }, secCRev: false };
+
+      document.querySelectorAll('.mock-sec-btn').forEach(btn => {
+        const active = btn.dataset.msec === activeMockSec;
+        btn.className = `mock-sec-btn px-4 py-2 rounded-xl text-xs font-semibold transition ${
+          active ? 'bg-sky-600 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+        }`;
+      });
+      document.querySelectorAll('.mock-sec-panel').forEach(p => {
+        p.classList.toggle('hidden', p.id !== `mock-section-${activeMockSec}`);
+      });
+
+      // Score badge
+      const correctA = mockSetA_MC.reduce((acc, q, idx) => acc + (m.mc[idx] === q.ans ? 1 : 0), 0);
+      const pctA = Math.round((correctA / mockSetA_MC.length) * 100);
+      const badge = document.getElementById('mock-score-badge');
+      badge.textContent = m.marked
+        ? `Section A: ${correctA} / 36 (${pctA}%) ${pctA >= 65 ? '· PASS' : '· <65%'}`
+        : `Section A: ${Object.keys(m.mc).length} / 36 Answered`;
+
+      // Section A
+      const secA = document.getElementById('mock-section-A');
+      secA.innerHTML = mockSetA_MC.map((item, qIdx) => {
+        const chosen = m.mc[qIdx];
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+            <div class="text-sm font-bold text-slate-900 mb-3">${item.q}</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              ${item.opts.map((opt, oIdx) => {
+                const letter = ['A', 'B', 'C', 'D'][oIdx];
+                let cls = 'border-slate-200 bg-slate-50 hover:border-sky-400 text-slate-800';
+                if (m.marked) {
+                  if (oIdx === item.ans) cls = 'border-emerald-500 bg-emerald-50 text-emerald-900 font-semibold';
+                  else if (oIdx === chosen) cls = 'border-rose-500 bg-rose-50 text-rose-900';
+                  else cls = 'border-slate-200 bg-slate-50 text-slate-400';
+                } else if (chosen === oIdx) {
+                  cls = 'border-sky-500 bg-sky-50 text-sky-900 font-semibold';
+                }
+                return `<button type="button" data-mq="${qIdx}" data-mo="${oIdx}" class="mock-mc-opt text-left text-xs p-3 rounded-xl border transition"><strong>${letter}.</strong> ${opt}</button>`.replace('transition"', `transition ${cls}"`);
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+      secA.querySelectorAll('.mock-mc-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (m.marked) return;
+          m.mc[Number(btn.dataset.mq)] = Number(btn.dataset.mo);
+          state.mockA = m;
+          saveState();
+          renderMockExam();
+        });
+      });
+
+      // Section B
+      const secB = document.getElementById('mock-section-B');
+      secB.innerHTML = mockSetA_Short.map((item, idx) => {
+        const rev = !!m.shortRev[idx];
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-2.5">
+            <div class="text-sm font-bold text-slate-900">${item.q}</div>
+            <textarea data-ms="${idx}" rows="3" placeholder="Type your answer here..." class="mock-short-input w-full text-xs p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500">${m.short[idx] || ''}</textarea>
+            <div class="flex items-center justify-between">
+              <button type="button" data-mrev="${idx}" class="mock-rev-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 transition">${rev ? 'Hide Model Answer' : 'Reveal Model Answer'}</button>
+            </div>
+            ${rev ? `<div class="text-xs p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900"><strong>Model Answer:</strong> ${item.model}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+      secB.querySelectorAll('.mock-short-input').forEach(ta => {
+        ta.addEventListener('input', () => {
+          m.short[Number(ta.dataset.ms)] = ta.value;
+          state.mockA = m;
+          saveState();
+        });
+      });
+      secB.querySelectorAll('.mock-rev-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = Number(btn.dataset.mrev);
+          m.shortRev[i] = !m.shortRev[i];
+          state.mockA = m;
+          saveState();
+          renderMockExam();
+        });
+      });
+
+      // Section C
+      const secC = document.getElementById('mock-section-C');
+      const parts = [
+        { k: 'a', label: '(a) What has happened and who and what is affected', model: 'The St. Andrew core switch has hardware errors and restarted twice today (Friday). It affects 965 St. Andrew users (850 students, 75 lecturers, 40 admin across 4 labs, Finance, Student Services, library) plus 570 Montego Bay users (500 students, 45 lecturers, 25 admin) relying on St. Andrew via VPN for SMS, LMS, files, and admin apps.' },
+        { k: 'b', label: '(b) The immediate actions you will take', model: 'Back up core switch configs immediately, inspect error logs and UPS/cabinet conditions, confirm replacement lead time and exact emergency delivery cost with the maintenance provider, and schedule a ~4-hour maintenance window outside peak classes.' },
+        { k: 'c', label: '(c) How you will tell staff and students', model: 'Send advance notice via email, portal/WhatsApp, and lecturer announcements stating the exact date, 4-hour outage window, and affected services (Internet, Wi-Fi, labs, SMS, admin systems), plus an all-clear notice when restored.' },
+        { k: 'd', label: '(d) A decision for the Principal on the emergency replacement, with your reasons', model: 'Approve the emergency delivery charge (confirming the fee with Finance). Waiting up to 5 business days for standard replacement risks a full shutdown across both campuses (1,535 users), disrupting classes, labs, and Finance far beyond the emergency fee.' },
+        { k: 'e', label: '(e) At least two follow-up actions to stop this happening again, each with an owner and a deadline', model: '1) Establish a preventive maintenance & config backup schedule (UPS tests, cabinet cleaning, firmware updates, weekly backups) — Owner: ICT Manager — Deadline: Within 7 days. 2) Formalize maintenance SLA with guaranteed response/replacement times and clear emergency fee terms — Owner: ICT Manager & Finance — Deadline: Within 14 days.' }
+      ];
+      secC.innerHTML = `
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+          <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950 leading-relaxed">
+            <strong>49. Practical Scenario (28 marks):</strong> It is Friday. The core switch at St. Andrew has started showing hardware errors and has restarted twice during the day. The Principal wants an urgent briefing. The maintenance provider says a replacement could take up to five business days, and an emergency delivery charge may apply. Replacing the core equipment may shut the network down for about four hours.
+          </div>
+          ${parts.map(p => `
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-slate-900">${p.label}</label>
+              <textarea data-mc-part="${p.k}" rows="3" placeholder="Write your briefing section..." class="mock-c-input w-full text-xs p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500">${(m.secC && m.secC[p.k]) || ''}</textarea>
+              ${m.secCRev ? `<div class="text-xs p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900"><strong>Model Briefing:</strong> ${p.model}</div>` : ''}
+            </div>
+          `).join('')}
+          <button type="button" id="btn-mock-c-rev" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition">${m.secCRev ? 'Hide Model Briefing' : 'Reveal Model Briefing (28 Marks)'}</button>
+        </div>
+      `;
+      secC.querySelectorAll('.mock-c-input').forEach(ta => {
+        ta.addEventListener('input', () => {
+          if (!m.secC) m.secC = {};
+          m.secC[ta.dataset.mcPart] = ta.value;
+          state.mockA = m;
+          saveState();
+        });
+      });
+      document.getElementById('btn-mock-c-rev').addEventListener('click', () => {
+        m.secCRev = !m.secCRev;
+        state.mockA = m;
+        saveState();
+        renderMockExam();
+      });
+    }
+
+    document.querySelectorAll('.mock-sec-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeMockSec = btn.dataset.msec;
+        renderMockExam();
+      });
+    });
+    document.getElementById('btn-mock-finish').addEventListener('click', () => {
+      state.mockA.marked = true;
+      saveState();
+      renderMockExam();
+      showToast('Section A marked!');
+    });
+    document.getElementById('btn-mock-reset').addEventListener('click', () => {
+      state.mockA = { mc: {}, marked: false, short: {}, shortRev: {}, secC: { a: '', b: '', c: '', d: '', e: '' }, secCRev: false };
+      saveState();
+      renderMockExam();
+      showToast('Mock Exam Set A reset');
+    });
+
+    // ---------- INIT ----------
+    loadState();
+    renderFaults();
+    renderCrisis();
+    renderMockExam();
+    updateCalculator();
+    loadDrill();
+    renderVlanTable();
+    renderFlashcards();
+    renderQuiz();
+    renderSupplierWeights();
+    renderRiskTable();
+    updateMasteryHeader();
+    switchTab(state.activeTab === 'assignments' ? 'overview' : (state.activeTab || 'overview'));
+  </script>
 </body>
 </html>
